@@ -1,0 +1,62 @@
+cd $HOME/PIGFEM4.6.1
+
+
+module load gcc/8.1.0
+export CC=gcc
+export CXX=g++
+export F90=gfortran
+export FC=gfortran
+
+tar xvzf gsl-2.1.tar.gz
+cd gsl-2.1
+./configure --prefix=$HOME/PIGFEM4.6.1/gsl-2.1/install
+make
+make install
+
+tar xvzf metis-5.1.0.tar.gz
+cd metis-5.1.0
+make config prefix=$HOME//PIGFEM4.6.1/metis-5.1.0/install cc=gcc
+#make config prefix=$HOME//PIGFEM4.6.1/metis-5.1.0/install cc=gcc shared=1
+#make config prefix=$HOME//PIGFEM4.6.1/metis-5.1.0/install cc=gcc shared=1 openmp=1
+make
+make install
+
+export PATH=$HOME/cmake-3.21.0-rc3-linux-x86_64/bin:$PATH
+export PATH=$HOME/openmpi/3.1.6/gcc/8.1.0/bin:$PATH
+export CC=mpicc
+export CXX=mpicxx
+export F90=mpif90
+export FC=mpif90
+
+tar xvzf  petsc-lite-3.7.3.tar.gz
+cd petsc-3.7.3/
+
+
+tar xvzf  petsc-lite-3.7.3.tar.gz
+cd petsc-3.7.3/
+./configure --with-petsc-arch=arch_external_opt \ 
+     --with-blas-lib=$HOME/OpenBLAS/0.3.20/gcc/8.1.0/lib64/libopenblas.a \
+     --with-lapack-lib=$HOME/OpenBLAS/0.3.20/gcc/8.1.0/lib64/libopenblas.a \
+     --with-mpi=1  --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90 
+
+make PETSC_DIR=$HOME/PIGFEM4.6.1/petsc-3.7.3 PETSC_ARCH=arch_external_opt all
+
+Now compile the main application:
+
+cd $HOME/PIGFEM4.6.1
+Edit Makefile and change lines 45-51 as:
+ifeq (${MAKECMDGOALS},debug)
+        CXX                     := ${HOME}/openmpi/3.1.6/gcc/8.1.0/bin/mpicxx
+        CXX_LINK        := ${CXX}
+else
+        CXX                     := ${HOME}/openmpi/3.1.6/gcc/8.1.0/bin/mpicxx
+        CXX_LINK        := ${CXX}
+endif
+
+export LIBRARY_PATH=/p/home/udaya/PIGFEM4.6.1/metis-5.1.0/install/lib:LIBRARY_PATH
+export LIBRARY_PATH=/p/home/udaya/PIGFEM4.6.1/gsl-2.1/install/lib:$LIBRARY_PATH
+export LIBRARY_PATH=/p/home/udaya/PIGFEM4.6.1/petsc-3.7.3/arch_external_opt/lib:$LIBRARY_PATH
+
+make
+The executable will be $HOME//PIGFEM4.6.1/Main
+

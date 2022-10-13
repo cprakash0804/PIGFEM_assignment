@@ -1,0 +1,4 @@
+1- Continuum damage model updated --> Hardening + Damage
+2- CZ penetration issue fixed
+3- Nonlinear solver fixed
+4- Output response fixed5- Viscous regularization added6- Makefile updated7- All material and CZM paramters can now be defined in the Main.cpp

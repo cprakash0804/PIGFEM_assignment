@@ -1,0 +1,5 @@
+while true; do
+ps -C MainSensitivity -o pid=,%mem=,vsz= >> /home/brandyb2/projects/PCIGFEM_current/mem.log
+gnuplot /home/brandyb2/projects/PCIGFEM_current/gnuplot.script
+sleep 1
+done &

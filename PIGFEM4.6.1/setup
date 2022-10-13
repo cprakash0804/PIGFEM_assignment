@@ -1,0 +1,326 @@
+#!/bin/bash
+
+curr_dir=$(pwd)
+echo $curr_dir
+
+PETSC_VERSION="3.7.3"
+METIS_VERSION="5.1.0"
+GSL_VERSION="2.1"
+
+
+
+# No command line parameters were passed in so we'll build the optimized version of the dependancies
+if [ "$#" -eq 0 ]; then
+
+
+	# UNZIP AND BUILD THE PETSC DEPENDANCY
+	# ------------------------------------
+	PETSC_DIR="$curr_dir""/petsc-""$PETSC_VERSION"
+
+	# Unzip
+	if [ ! -d "$PETSC_DIR" ]; then
+		echo "UNZIPPING PETSC..."
+		gunzip petsc-lite-"$PETSC_VERSION".tar.gz
+		tar -xvf petsc-lite-"$PETSC_VERSION".tar
+		mv petsc-lite-"$PETSC_VERSION".tar petsc-"$PETSC_VERSION"/petsc-lite-"$PETSC_VERSION".tar
+	fi
+
+	cd "$PETSC_DIR"
+
+	PETSC_OPT_ARCH="arch_external_opt"
+	PETSC_OPT_ARCH_DIR="$PETSC_DIR""/""$PETSC_OPT_ARCH"
+	if [ ! -d "$PETSC_OPT_ARCH_DIR" ]; then
+		echo "INSTALLING PETSC..."
+		./configure --PETSC_ARCH="$PETSC_OPT_ARCH" --with-cc=gcc --with-cxx=g++ --with-fc=gfortran --download-mpich --download-fblaslapack --download-parmetis --download-metis \
+		--download-hypre --download-superlu_dist --download-scalapack --download-mumps --with-shared-libraries=1 --with-debugging=0 \
+		COPTFLAGS='-O3 -march=native -mtune=native' CXXOPTFLAGS='-O3 -march=native -mtune=native' FOPTFLAGS='-O3 -march=native -mtune=native'
+
+		make PETSC_DIR="$PETSC_DIR" PETSC_ARCH="$PETSC_OPT_ARCH" all
+		make PETSC_DIR="$PETSC_DIR" PETSC_ARCH="$PETSC_OPT_ARCH" test
+		make PETSC_DIR="$PETSC_DIR" PETSC_ARCH="$PETSC_OPT_ARCH" streams
+	fi
+
+	# Set the home directory of the MPI commands
+	MPI_HOME="$PETSC_OPT_ARCH_DIR""/bin"
+	# Add the mpi directory to my path variable and just for the current shell as well
+	export PATH="$MPI_HOME":"$PATH"
+	# echo "export PATH=$MPI_HOME:\$PATH" >> ~/.bashrc
+	
+	echo "Leaving the PETSc directory..."
+	cd ..
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo
+
+
+	# UNZIP AND BUILD THE METIS DEPENDANCY
+	# ------------------------------------
+	METIS_DIR=$curr_dir"/metis-"$METIS_VERSION
+
+	if [ ! -d "$METIS_DIR" ]; then
+		echo "UNZIPPING METIS..."
+		gunzip metis-"$METIS_VERSION".tar.gz
+		tar -xvf metis-"$METIS_VERSION".tar
+		mv metis-"$METIS_VERSION".tar metis-"$METIS_VERSION"/metis-"$METIS_VERSION".tar
+	fi
+
+	cd "$METIS_DIR"
+	echo $(pwd)
+	# The first step in the METIS Install.txt file is to modify the include/metis.h file to say how big
+	# the size of an integer is (32 bits or 64 bits) The default is 32 and I don't know how to change that
+	# from a script so I guess we'll just leave it at that for now
+	# For the make config call:
+	# necessary options: cc=mpicxx shared=1 prefix=$
+	# debugging options: gdb=1 debug=1 assert=1
+	# NOTE: for some reason the shared METIS library does not work...
+
+	# Build the optimized version of METIS
+	METIS_OPT_INSTALL_DIR="$METIS_DIR""/install"
+	echo "$METIS_OPT_INSTALL_DIR"
+	if [ ! -d "$METIS_OPT_INSTALL_DIR" ]; then
+		echo "INSTALLING METIS..."
+		mkdir install
+		make config cc=mpicc prefix="$METIS_OPT_INSTALL_DIR"
+		make
+		make install
+	fi
+ 
+	echo "Leaving the METIS directory..."
+	cd ..
+
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+	echo 
+
+
+
+
+
+	# UNZIP AND BUILD THE GSL DEPENDANCY
+	# ----------------------------------
+	GSL_DIR=$curr_dir"/gsl-"$GSL_VERSION
+
+	# Unzip
+	if [ ! -d "$GSL_DIR" ]; then
+		echo "UNZIPPING GSL..."
+		gunzip gsl-"$GSL_VERSION".tar.gz
+		tar -xvf gsl-"$GSL_VERSION".tar
+		mv gsl-"$GSL_VERSION".tar gsl-"$GSL_VERSION"/gsl-"$GSL_VERSION".tar
+	fi
+
+	cd "$GSL_DIR"
+
+	# Build
+	GSL_INSTALL_DIR="$GSL_DIR""/install"
+	if [ ! -d "$GSL_INSTALL_DIR" ]; then
+		echo "INSTALLING GSL..."
+		mkdir install
+		./configure cc=mpicc --enable-shared prefix="$GSL_INSTALL_DIR"
+		make
+		make install
+	fi
+
+	echo "Leaving the GSL directory..."
+	cd ..
+
+
+
+
+	# Make the optimized version of PCIGFEM
+	make
+
+
+
+	
+
+
+
+else
+
+	# Build the debu versions of the dependancies
+	if [ "$1" == "debug" ]; then
+
+
+		# UNZIP AND BUILD THE PETSC DEPENDANCY
+		# ------------------------------------
+		PETSC_DIR="$curr_dir""/petsc-""$PETSC_VERSION"
+
+		# Unzip
+		if [ ! -d "$PETSC_DIR" ]; then
+			echo "UNZIPPING PETSC..."
+			gunzip petsc-lite-"$PETSC_VERSION".tar.gz
+			tar -xvf petsc-lite-"$PETSC_VERSION".tar
+			mv petsc-lite-"$PETSC_VERSION".tar petsc-"$PETSC_VERSION"/petsc-lite-"$PETSC_VERSION".tar
+		fi
+
+		cd "$PETSC_DIR"
+
+		PETSC_DEBUG_ARCH="arch_external_debug"
+		PETSC_DEBUG_ARCH_DIR="$PETSC_DIR""/""$PETSC_DEBUG_ARCH"
+		if [ ! -d "$PETSC_DEBUG_ARCH_DIR" ]; then
+			echo "INSTALLING PETSC..."
+			./configure --PETSC_ARCH="$PETSC_DEBUG_ARCH" --with-cc=gcc --with-cxx=g++ --with-fc=gfortran --download-fblaslapack --download-mpich --download-parmetis --download-metis \
+			 --download-hypre --download-superlu_dist --download-scalapack --download-mumps --with-shared-libraries=1 --with-debugging=1
+			make PETSC_DIR="$PETSC_DIR" PETSC_ARCH="$PETSC_DEBUG_ARCH" all
+			make PETSC_DIR="$PETSC_DIR" PETSC_ARCH="$PETSC_DEBUG_ARCH" test
+			make PETSC_DIR="$PETSC_DIR" PETSC_ARCH="$PETSC_DEBUG_ARCH" streams
+		fi
+
+		# Set the home directory of the MPI commands
+		MPI_HOME="$PETSC_DEBUG_ARCH_DIR""/bin"
+		# Add the mpi directory to my path variable and just for the current shell as well
+		export PATH="$MPI_HOME":"$PATH"
+
+		echo "Leaving the PETSc directory..."
+		cd ..
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+
+
+
+		# UNZIP AND BUILD THE METIS DEPENDANCY
+		# ------------------------------------
+		METIS_DIR=$curr_dir"/metis-"$METIS_VERSION
+
+		if [ ! -d "$METIS_DIR" ]; then
+			echo "UNZIPPING METIS..."
+			gunzip metis-"$METIS_VERSION".tar.gz
+			tar -xvf metis-"$METIS_VERSION".tar
+			mv metis-"$METIS_VERSION".tar metis-"$METIS_VERSION"/metis-"$METIS_VERSION".tar
+		fi
+
+		cd "$METIS_DIR"
+		echo $(pwd)
+		# The first step in the METIS Install.txt file is to modify the include/metis.h file to say how big
+		# the size of an integer is (32 bits or 64 bits) The default is 32 and I don't know how to change that
+		# from a script so I guess we'll just leave it at that for now
+		# For the make config call:
+		# necessary options: cc=mpicxx shared=1 prefix=$
+		# debugging options: gdb=1 debug=1 assert=1
+		# NOTE: for some reason the shared METIS library does not work...
+
+		# Build the debug version of METIS
+		METIS_DEBUG_INSTALL_DIR="$METIS_DIR""/install_debug"
+		echo "$METIS_DEBUG_INSTALL_DIR"
+		if [ ! -d "$METIS_DEBUG_INSTALL_DIR" ]; then
+			echo "INSTALLING METIS..."
+			mkdir install_debug
+			make config cc=mpicc gdb=1 debug=1 assert=1 prefix="$METIS_DEBUG_INSTALL_DIR"
+			make
+			make install
+		fi
+ 
+		echo "Leaving the METIS directory..."
+		cd ..
+
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+		echo 
+
+
+
+
+
+		# UNZIP AND BUILD THE GSL DEPENDANCY
+		# ----------------------------------
+		GSL_DIR=$curr_dir"/gsl-"$GSL_VERSION
+
+		# Unzip
+		if [ ! -d "$GSL_DIR" ]; then
+			echo "UNZIPPING GSL..."
+			gunzip gsl-"$GSL_VERSION".tar.gz
+			tar -xvf gsl-"$GSL_VERSION".tar
+			mv gsl-"$GSL_VERSION".tar gsl-"$GSL_VERSION"/gsl-"$GSL_VERSION".tar
+		fi
+
+		cd "$GSL_DIR"
+
+		# Build
+		GSL_INSTALL_DIR="$GSL_DIR""/install"
+		if [ ! -d "$GSL_INSTALL_DIR" ]; then
+			echo "INSTALLING GSL"
+			mkdir install
+			./configure cc=mpicc --enable-shared prefix="$GSL_INSTALL_DIR"
+			make
+			make install
+		fi
+
+		echo "Leaving the GSL directory..."
+		cd ..
+
+
+
+
+		# Make the debug version of PCIGFEM
+		make debug
+
+
+
+	else
+
+
+		if [ "$1" == "clean" ]; then
+
+			rm -rf petsc-"$PETSC_VERSION"
+			rm -rf gsl-"$GSL_VERSION"
+			rm -rf metis-"$METIS_VERSION"
+			make clean
+
+		else
+
+			echo "Unknown command line parameter"
+
+		fi
+	fi
+fi
+
+
