@@ -1,0 +1,42 @@
+jobStarter
+Currently Loaded Modulefiles:
+ 1) bct-env/0.1                   10) craype-x86-rome         
+ 2) bc_mod/1.3.4                  11) craype-network-ofi      
+ 3) /p/app/startup/shell.module   12) cray-dsmml/0.2.1        
+ 4) /p/app/startup/alias.module   13) perftools-base/21.09.0  
+ 5) libfabric/1.11.0.4.97         14) cray-mpich/8.1.9        
+ 6) /p/app/startup/login.module   15) cray-libsci/21.08.1.2   
+ 7) /p/app/startup/login2.module  16) cray-pals/1.1.5         
+ 8) cce/12.0.3                    17) PrgEnv-cray/8.1.0       
+ 9) craype/2.7.10                 18) gcc/8.1.0               
+Reading inclusions...
+Generating the mesh...
+
+Setting up the problem...
+	Detecting Nodes... 0.00873311 seconds
+	Detecting Elements... 0.00422712 seconds
+[0]PETSC ERROR: ------------------------------------------------------------------------
+[0]PETSC ERROR: Caught signal number 11 SEGV: Segmentation Violation, probably memory access out of range
+[0]PETSC ERROR: Try option -start_in_debugger or -on_error_attach_debugger
+[0]PETSC ERROR: or see http://www.mcs.anl.gov/petsc/documentation/faq.html#valgrind
+[0]PETSC ERROR: or try http://valgrind.org on GNU/linux and Apple Mac OS X to find memory corruption errors
+[0]PETSC ERROR: likely location of problem given in stack below
+[0]PETSC ERROR: ---------------------  Stack Frames ------------------------------------
+[0]PETSC ERROR: Note: The EXACT line numbers in the stack are not available,
+[0]PETSC ERROR:       INSTEAD the line number of the start of the function
+[0]PETSC ERROR:       is given.
+[0]PETSC ERROR: --------------------- Error Message --------------------------------------------------------------
+[0]PETSC ERROR: Signal received
+[0]PETSC ERROR: See http://www.mcs.anl.gov/petsc/documentation/faq.html for trouble shooting.
+[0]PETSC ERROR: Petsc Release Version 3.7.3, Jul, 24, 2016 
+[0]PETSC ERROR: ./Main on a arch_external_opt named x1000c7s2b0n1 by vikas Wed Jun 22 10:24:03 2022
+[0]PETSC ERROR: Configure options --with-petsc-arch=arch_external_opt --with-blas-lib=/p/home/vikas/OpenBLAS/0.3.20/gcc/8.1.0/lib64/libopenblas.a --with-lapack-lib=/p/home/vikas/OpenBLAS/0.3.20/gcc/8.1.0/lib64/libopenblas.a --with-mpi=1 --with-cc=mpicc --with-cxx=mpicxx --with-fc=mpif90
+[0]PETSC ERROR: #1 User provided function() line 0 in  unknown file
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 0 in communicator MPI_COMM_WORLD
+with errorcode 59.
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------

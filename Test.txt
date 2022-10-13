@@ -1,0 +1,46 @@
+#!/bin/csh
+#gen_pbs version: 2.1.0
+#PBS -A           WPWAFMLW44353NGC
+#PBS -N           test
+#PBS -joe
+#PBS -e           Test.oe
+#PBS -o           Test.oe
+#PBS -mbe
+#PBS -l           walltime=1:00:00
+#PBS -l           select=1:ncpus=128:mpiprocs=128
+#PBS -q           debug
+
+module load gcc/8.1.0
+setenv DIR_ADRS /p/home/vikas/PIGFEM4.6.1
+echo "$DIR_ADRS" > /p/home/vikas/Projects/Maryam/Test.log
+setenv EXEC ${DIR_ADRS}/Main
+echo "$EXEC" >> /p/home/vikas/Projects/Maryam/Test.log
+setenv PATH $HOME/openmpi/3.1.6/gcc/8.1.0/bin:$PATH
+echo "PATH" >> /p/home/vikas/Projects/Maryam/Test.log
+setenv LD_LIBRARY_PATH ${DIR_ADRS}/petsc-3.7.3/arch_external_opt/lib:${DIR_ADRS}/gsl-2.1/install/lib:$LD_LIBRARY_PATH
+echo "LD_LIBRARY_PATH" >> /p/home/vikas/Projects/Maryam/Test.log
+setenv LD_LIBRARY_PATH $HOME/openmpi/3.1.6/gcc/8.1.0/lib:$LD_LIBRARY_PATH
+echo "LD_LIBRARY_PATH" >> /p/home/vikas/Projects/Maryam/Test.log
+
+limit stacksize unlimited 
+
+setenv JOBID `echo ${PBS_JOBID} | cut -d '.' -f 1`
+echo "$JOBID" >> /p/home/vikas/Projects/Maryam/Test.log
+setenv SCR $WORKDIR/TestFEM.$JOBID
+echo "$SCR" >> /p/home/vikas/Projects/Maryam/Test.log
+if !(-e $SCR) mkdir $SCR
+
+echo "Job $PBS_JOBID started on `date` running on `hostname`" >> /p/home/vikas/Projects/Maryam/Test.log
+
+cd /p/home/vikas/Projects/Maryam/
+cp  Test.csv $SCR/
+cp $DIR_ADRS/Main $SCR
+cd $SCR
+mkdir Input
+mkdir Output
+cp Test.csv Input
+
+module list
+
+/p/home/vikas/openmpi/3.1.6/gcc/8.1.0/bin/mpirun -np 1 ./Main -IN "Input/Test.csv" -sensitivity true
+
